@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ReactTable from 'react-table-v6';
 import 'react-table-v6/react-table.css';
 import Button from '@material-ui/core/Button';
+import Addcar from './Addcar';
+import Editcar from './Editcar';
 
 export default function Carlist(){
 
@@ -26,9 +28,36 @@ export default function Carlist(){
             fetch(link, {method: 'DELETE'})
             .then(response => fetchData())
             .catch(err => console.error(err));
+            
         }    
 
     }
+
+    const saveCar = (car) => {
+        fetch('https://carstockrest.herokuapp.com/cars', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(car)
+        })
+        .then(res => fetchData())
+        .catch(err => console.error(err))
+    }
+
+    const updateCar = (car, link) => {
+        fetch(link, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(car)
+        })
+        .then(res => fetchData())
+        .catch(err => console.error(err))
+
+    }
+   
 
     const columns = [
 
@@ -66,8 +95,17 @@ export default function Carlist(){
             sortable: false,
             filterable: false,
             width: 100,
+            Cell: row => <Editcar updateCar={updateCar} car={row.original}/>
+
+        },
+
+        {
+            sortable: false,
+            filterable: false,
+            width: 100,
             accessor: '_links.self.href',
             Cell: row => <Button size= "small" color = "secondary" onClick={() => deleteCar(row.value)}>Delete</Button>
+            
         }
 
         
@@ -77,7 +115,9 @@ export default function Carlist(){
 
         <div>
 
-        <ReactTable data={cars} columns={columns} filterable={true}/>
+        <Addcar saveCar={saveCar}/>
+        <ReactTable defaultPageSize={10} data={cars} columns={columns} filterable={true}/>
+        
 
         </div>
     );
